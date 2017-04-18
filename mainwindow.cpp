@@ -1,12 +1,13 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "workoutlogdialog.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    connect(ui->countdown_control, SIGNAL(clicked(bool)), this, SLOT(handleCountdownControl(bool)));
+    connect(ui->log_control, SIGNAL(clicked(bool)), this, SLOT(handleLogControl(bool)));
 }
 
 MainWindow::~MainWindow()
@@ -14,18 +15,14 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::handleCountdownControl(bool clicked)
+void MainWindow::setDatabase(DBManager *database)
 {
-    (void)clicked;
-    // assume a toggle
+    _database = database;
+}
 
-    if(countdown_state)
-    {
-        ui->countdown_control->setText(tr("Start"));
-    }
-    else
-    {
-        ui->countdown_control->setText(tr("Pause"));
-    }
-    countdown_state = !countdown_state;
+void MainWindow::handleLogControl(bool checked)
+{
+    (void)checked;
+    WorkoutLogDialog* log_dialog = new WorkoutLogDialog(this, _database);
+    log_dialog->exec();
 }

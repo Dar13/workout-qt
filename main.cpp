@@ -2,6 +2,7 @@
 #include <QApplication>
 
 #include "countdownmodel.h"
+#include "dbmanager.h"
 
 int main(int argc, char *argv[])
 {
@@ -10,6 +11,9 @@ int main(int argc, char *argv[])
     w.show();
 
     CountdownModel countdownModel(&w);
+    DBManager dbManager(nullptr);
+
+    w.setDatabase(&dbManager);
 
     return a.exec();
 }
