@@ -22,7 +22,7 @@ public:
     void updateExerciseInformation(ExerciseInformation& info);
 
     QVector<SetInformation> getAllSets();
-    QVector<ExerciseInformation> getAllExercises();
+    QVector<ExerciseInformation> getExercises(bool favorites_only = false);
     QVector<SetDisplayInformation> getAllDisplaySets();
 
     // TODO: Get a list, based on date range
