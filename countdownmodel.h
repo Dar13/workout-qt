@@ -19,14 +19,19 @@ class CountdownModel : public QObject
 
 public:
     explicit CountdownModel(QObject *parent = 0);
+    ~CountdownModel();
 
 signals:
 
 public slots:
-    void countdownTimeout();
+    void countdownPeriodic();
     void handleButton(bool);
 
 private:
+    void _updateState();
+
+    int _count;
+    int _initialCount;
     bool _started;
     CountdownModelState _state;
     QPushButton* _button;
