@@ -26,9 +26,7 @@ WorkoutLogTableModel::WorkoutLogTableModel(DBManager *database)
 {
     if(_database)
     {
-        qDebug("Retrieving data");
         _sets = _database->getAllDisplaySets();
-        qDebug(tr("Num sets: %0").arg(_sets.length()).toStdString().c_str());
     }
 }
 
@@ -80,9 +78,9 @@ QVariant WorkoutLogTableModel::data(const QModelIndex &index, int role) const
 
 QVariant WorkoutLogTableModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
+    QVariant value;
     if(orientation == Qt::Horizontal && role == Qt::DisplayRole)
     {
-        QVariant value;
         switch(section)
         {
         case 0:
@@ -97,12 +95,8 @@ QVariant WorkoutLogTableModel::headerData(int section, Qt::Orientation orientati
         case 3:
             value = tr("Reps");
             break;
-        default:
-            break;
         }
-
-        return value;
     }
 
-    return QVariant();
+    return value;
 }

@@ -21,14 +21,20 @@ const QString insert_exercise = "INSERT INTO ExerciseInfo (name, favorite) "
 const QString insert_set = "INSERT INTO SetInfo (exercise_id, weight, reps) "
                            "VALUES (?, ?, ?)";
 
-const QString retrieve_sets = "SELECT S.time, E.name, S.weight, S.reps "
-                              "FROM ExerciseInfo as E, SetInfo as S "
-                              "WHERE E.id = S.exercise_id";
+const QString get_sets = "SELECT S.time, E.name, S.weight, S.reps "
+                         "FROM ExerciseInfo as E, SetInfo as S "
+                         "WHERE E.id = S.exercise_id";
+
+const QString get_all_exercises = "SELECT id, name, favorite FROM ExerciseInfo;";
+const QString get_fav_exercises = "SELECT id, name, favorite FROM ExerciseInfo "
+                                  "WHERE favorite != 0;";
 
 // TODO: retrieve sets in date range
 
 const QString update_exercise = "UPDATE ExerciseInfo SET favorite = ?";
 const QString update_set = "UPDATE SetInfo SET weight = ?, reps = ?";
+
+// TODO: Rework query execution into separate templated function
 
 DBManager::DBManager(QObject *parent) : QObject(parent)
 {
@@ -113,9 +119,33 @@ void DBManager::updateSetInformation(SetInformation &info)
     return;
 }
 
-QVector<ExerciseInformation> DBManager::getAllExercises()
+QVector<ExerciseInformation> DBManager::getExercises(bool favorites_only)
 {
-    return QVector<ExerciseInformation>();
+    QVector<ExerciseInformation> values;
+    QSqlQuery query(_database);
+    const QString& query_str = (favorites_only) ? get_fav_exercises : get_all_exercises;
+    if(query.prepare(query_str) && query.exec())
+    {
+        if(query.first())
+        {
+            while(query.isValid())
+            {
+                ExerciseInformation ex_info;
+                ex_info.id = query.value(0).toInt();
+                ex_info.name = query.value(1).toString();
+                ex_info.favorite = query.value(2).toBool();
+                values.push_back(ex_info);
+                query.next();
+            }
+            query.finish();
+        }
+    }
+    else
+    {
+        qCritical("Unable to prepare/execute retrieval query");
+    }
+
+    return values;
 }
 
 QVector<SetInformation> DBManager::getAllSets()
@@ -126,16 +156,18 @@ QVector<SetInformation> DBManager::getAllSets()
 QVector<SetDisplayInformation> DBManager::getAllDisplaySets()
 {
     QSqlQuery query(_database);
-    if(!query.prepare(retrieve_sets))
+    if(!query.prepare(get_sets) || !query.exec())
     {
-        qCritical("Unable to prepare retrieval query");
+        qCritical("Unable to prepare/execute retrieval query");
         return QVector<SetDisplayInformation>();
     }
-
-    if(!query.exec() || !query.first())
+    else
     {
-        qCritical("Unable to execute retrieval query");
-        return QVector<SetDisplayInformation>();
+        if(!query.first())
+        {
+            // Empty result
+            return QVector<SetDisplayInformation>();
+        }
     }
 
     QVector<SetDisplayInformation> values;
