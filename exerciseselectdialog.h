@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QAbstractTableModel>
+#include <QItemSelection>
 
 #include "dbmanager.h"
 
@@ -19,6 +20,7 @@ public:
     int columnCount(const QModelIndex &parent) const;
     QVariant data(const QModelIndex &index, int role) const;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const;
+    ExerciseInformation getExercise(int row);
 
     Qt::ItemFlags flags(const QModelIndex &index) const;
 private:
@@ -35,10 +37,19 @@ public:
     explicit ExerciseSelectDialog(QWidget *parent = 0, DBManager* dbManager = nullptr);
     ~ExerciseSelectDialog();
 
+    ExerciseInformation getSelectedExercise();
+
+public slots:
+    void handleAddExercise(bool);
+    void handleEditExercise(bool);
+    void handleRowSelection(const QModelIndex&, const QModelIndex&);
+
 private:
     Ui::ExerciseSelectDialog *ui;
+    DBManager* _database;
     ExerciseSelectTableModel _favoritesModel;
     ExerciseSelectTableModel _allModel;
+    ExerciseInformation _selectedExercise;
 };
 
 #endif // EXERCISESELECTDIALOG_H

@@ -32,5 +32,8 @@ void MainWindow::handleLogControl(bool)
 void MainWindow::handleExerciseSelect(bool)
 {
     ExerciseSelectDialog* ex_sel_dialog = new ExerciseSelectDialog(this, _database);
-    ex_sel_dialog->exec();
+    if(ex_sel_dialog->exec() == QDialog::Accepted)
+    {
+        ui->exercise_control->setText(ex_sel_dialog->getSelectedExercise().name);
+    }
 }

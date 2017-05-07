@@ -124,7 +124,7 @@ QVector<ExerciseInformation> DBManager::getExercises(bool favorites_only)
     QVector<ExerciseInformation> values;
     QSqlQuery query(_database);
     const QString& query_str = (favorites_only) ? get_fav_exercises : get_all_exercises;
-    if(query.prepare(query_str) || query.exec())
+    if(query.prepare(query_str) && query.exec())
     {
         if(query.first())
         {
