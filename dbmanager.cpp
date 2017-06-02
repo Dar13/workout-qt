@@ -31,7 +31,7 @@ const QString get_fav_exercises = "SELECT id, name, favorite FROM ExerciseInfo "
 
 // TODO: retrieve sets in date range
 
-const QString update_exercise = "UPDATE ExerciseInfo SET favorite = ?";
+const QString update_exercise = "UPDATE ExerciseInfo SET name = ?,favorite = ? WHERE id = ?";
 const QString update_set = "UPDATE SetInfo SET weight = ?, reps = ?";
 
 // TODO: Rework query execution into separate templated function
@@ -88,6 +88,10 @@ void DBManager::addExerciseInformation(ExerciseInformation& info)
     {
         qCritical("Insertion of exercise information failed!");
     }
+    else
+    {
+        emit exercisesUpdated();
+    }
 }
 
 void DBManager::addSetInformation(SetInformation &info)
@@ -105,12 +109,31 @@ void DBManager::addSetInformation(SetInformation &info)
     {
         qCritical("Insertion of set information failed!");
     }
+    else
+    {
+        emit setsUpdated();
+    }
 }
 
 void DBManager::updateExerciseInformation(ExerciseInformation &info)
 {
-    qCritical("IMPLEMENT UPDATE EXERCISE INFO");
-    return;
+    QSqlQuery query(_database);
+    if(!query.prepare(update_exercise))
+    {
+        qCritical("Failed to prepare update query for ExerciseInfo!");
+        return;
+    }
+    query.addBindValue(info.name);
+    query.addBindValue(info.favorite);
+    query.addBindValue(info.id);
+    if(!query.exec())
+    {
+        qCritical("Update of exercise information failed!");
+    }
+    else
+    {
+        emit exercisesUpdated();
+    }
 }
 
 void DBManager::updateSetInformation(SetInformation &info)

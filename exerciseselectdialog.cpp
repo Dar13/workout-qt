@@ -1,5 +1,7 @@
 #include <memory>
 
+#include <QMenu>
+
 #include "exerciseselectdialog.h"
 #include "exerciseinfodialog.h"
 
@@ -19,12 +21,18 @@ ExerciseSelectDialog::ExerciseSelectDialog(QWidget *parent, DBManager* dbManager
     ui->favorite_list_view->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
     connect(ui->favorite_list_view->selectionModel(), &QItemSelectionModel::currentRowChanged,
             this, &ExerciseSelectDialog::handleRowSelection);
+    connect(ui->favorite_list_view, &QTableView::customContextMenuRequested,
+            this, &ExerciseSelectDialog::contextMenu);
+    connect(dbManager, &DBManager::exercisesUpdated, &_favoritesModel, &ExerciseSelectTableModel::updateExercises);
 
     ui->all_list_view->setModel(&_allModel);
     ui->all_list_view->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
     ui->all_list_view->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
     connect(ui->all_list_view->selectionModel(), &QItemSelectionModel::currentRowChanged,
             this, &ExerciseSelectDialog::handleRowSelection);
+    connect(ui->all_list_view, &QTableView::customContextMenuRequested,
+            this, &ExerciseSelectDialog::contextMenu);
+    connect(dbManager, &DBManager::exercisesUpdated, &_allModel, &ExerciseSelectTableModel::updateExercises);
 
     connect(ui->add_exercise_button, &QPushButton::clicked,
             this, &ExerciseSelectDialog::handleAddExercise);
@@ -54,13 +62,21 @@ void ExerciseSelectDialog::handleAddExercise(bool)
 
 void ExerciseSelectDialog::handleEditExercise(bool)
 {
-    qCritical("IMPLEMENT EDIT EXERCISE");
+    if(_exerciseSelected)
+    {
+      editExercise(_selectedExercise);
+    }
+    // else, pop up a message box saying to select a message first?
 }
 
 void ExerciseSelectDialog::handleRowSelection(const QModelIndex& curr, const QModelIndex& prev)
 {
+    (void)prev;
     if(curr.model())
     {
+        // Apparently, you can't nullify a selection in a TableView so this is a one-time assignment
+        // TODO: If this isn't true, update this accordingly
+        _exerciseSelected = true;
         ui->buttonBox->setEnabled(true);
         if(curr.model() == reinterpret_cast<QAbstractItemModel*>(&_allModel))
         {
@@ -69,6 +85,51 @@ void ExerciseSelectDialog::handleRowSelection(const QModelIndex& curr, const QMo
         else
         {
             _selectedExercise = _favoritesModel.getExercise(curr.row());
+        }
+    }
+}
+
+void ExerciseSelectDialog::contextMenu(const QPoint& point)
+{
+    QObject* sender = this->sender();
+    QTableView* view = qobject_cast<QTableView*>(sender);
+    bool edit = false;
+    auto edit_callback = [&edit](bool) { edit = true; };
+
+    if(view != nullptr)
+    {
+        // Context menu!
+        QAction* edit_ptr = new QAction(tr("&Edit"), view);
+        std::unique_ptr<QAction> edit_act(edit_ptr);
+        edit_act->setStatusTip(tr("Edit the selected exercise"));
+        connect(edit_act.get(), &QAction::triggered, edit_callback);
+
+        QMenu ctx(view);
+        ctx.addAction(edit_act.get());
+        ctx.exec(view->mapToGlobal(point));
+
+        if(edit)
+        {
+            // Look up the cell of the point, retrieve full exercise, and edit it
+            auto cellIdx = view->indexAt(point);
+            ExerciseSelectTableModel* view_model = qobject_cast<ExerciseSelectTableModel*>(view->model());
+            ExerciseInformation exercise = view_model->getExercise(cellIdx.row());
+            editExercise(exercise);
+            _database->updateExerciseInformation(exercise);
+        }
+    }
+}
+
+void ExerciseSelectDialog::editExercise(ExerciseInformation &info)
+{
+    auto info_dlg = std::make_unique<ExerciseInfoDialog>(new ExerciseInfoDialog(this));
+    if(info_dlg)
+    {
+        info_dlg->setElements(info.name, info.favorite);
+        if(info_dlg->exec() == QDialog::Accepted)
+        {
+            info.name = info_dlg->getName();
+            info.favorite = info_dlg->isFavorite();
         }
     }
 }
@@ -84,7 +145,6 @@ ExerciseSelectTableModel::ExerciseSelectTableModel(DBManager *database, bool onl
 
 Qt::ItemFlags ExerciseSelectTableModel::flags(const QModelIndex &index) const
 {
-    // TODO: Make cells editable, to enable exercise modification?
     return (Qt::ItemIsSelectable | QAbstractTableModel::flags(index));
 }
 
@@ -144,4 +204,12 @@ QVariant ExerciseSelectTableModel::headerData(int section, Qt::Orientation orien
 ExerciseInformation ExerciseSelectTableModel::getExercise(int row)
 {
     return _exercises.at(row);
+}
+
+void ExerciseSelectTableModel::updateExercises()
+{
+    int prev_col_count = this->columnCount(this->createIndex(0,0,nullptr));
+    _exercises = _database->getExercises(_only_favorites);
+    emit dataChanged(this->createIndex(0,0,nullptr),
+                     this->createIndex(1,prev_col_count, nullptr));
 }

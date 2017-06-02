@@ -13,6 +13,12 @@ ExerciseInfoDialog::~ExerciseInfoDialog()
     delete ui;
 }
 
+void ExerciseInfoDialog::setElements(QString &name, bool is_fav)
+{
+    ui->exercise_edit->document()->setPlainText(name);
+    ui->fav_check->setChecked(is_fav);
+}
+
 QString ExerciseInfoDialog::getName()
 {
     return ui->exercise_edit->document()->toPlainText();
