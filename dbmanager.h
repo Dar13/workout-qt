@@ -28,6 +28,8 @@ public:
     // TODO: Get a list, based on date range
 
 signals:
+    void exercisesUpdated();
+    void setsUpdated();
 
 public slots:
 

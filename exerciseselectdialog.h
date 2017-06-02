@@ -13,6 +13,8 @@ class ExerciseSelectDialog;
 
 class ExerciseSelectTableModel : public QAbstractTableModel
 {
+    Q_OBJECT
+
 public:
     ExerciseSelectTableModel(DBManager* database = nullptr, bool only_favorites = false);
 
@@ -23,6 +25,10 @@ public:
     ExerciseInformation getExercise(int row);
 
     Qt::ItemFlags flags(const QModelIndex &index) const;
+
+public slots:
+    void updateExercises();
+
 private:
     bool _only_favorites;
     DBManager* _database;
@@ -43,12 +49,16 @@ public slots:
     void handleAddExercise(bool);
     void handleEditExercise(bool);
     void handleRowSelection(const QModelIndex&, const QModelIndex&);
+    void contextMenu(const QPoint&);
 
 private:
+    void editExercise(ExerciseInformation& info);
+
     Ui::ExerciseSelectDialog *ui;
     DBManager* _database;
     ExerciseSelectTableModel _favoritesModel;
     ExerciseSelectTableModel _allModel;
+    bool _exerciseSelected;
     ExerciseInformation _selectedExercise;
 };
 

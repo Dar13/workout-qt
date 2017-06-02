@@ -15,6 +15,8 @@ public:
     explicit ExerciseInfoDialog(QWidget *parent = 0);
     ~ExerciseInfoDialog();
 
+    void setElements(QString& name, bool is_fav);
+
     QString getName();
     bool isFavorite();
 
