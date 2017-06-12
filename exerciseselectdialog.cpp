@@ -89,12 +89,21 @@ void ExerciseSelectDialog::handleRowSelection(const QModelIndex& curr, const QMo
     }
 }
 
+enum class CtxMenuSelection
+{
+    CTX_SEL_NONE    = 0x0,
+    CTX_SEL_EDIT    = 0x1,
+    CTX_SEL_DEL     = 0x2,
+};
+
 void ExerciseSelectDialog::contextMenu(const QPoint& point)
 {
     QObject* sender = this->sender();
     QTableView* view = qobject_cast<QTableView*>(sender);
-    bool edit = false;
-    auto edit_callback = [&edit](bool) { edit = true; };
+    CtxMenuSelection selected = CtxMenuSelection::CTX_SEL_NONE;
+
+    auto edit_callback = [&selected](bool) { selected = CtxMenuSelection::CTX_SEL_EDIT; };
+    auto del_callback = [&selected](bool) { selected = CtxMenuSelection::CTX_SEL_DEL; };
 
     if(view != nullptr)
     {
@@ -104,18 +113,32 @@ void ExerciseSelectDialog::contextMenu(const QPoint& point)
         edit_act->setStatusTip(tr("Edit the selected exercise"));
         connect(edit_act.get(), &QAction::triggered, edit_callback);
 
+        QAction* del_ptr = new QAction(tr("&Delete"), view);
+        std::unique_ptr<QAction> del_act(del_ptr);
+        del_act->setStatusTip(tr("Delete the selected exercise"));
+        connect(del_act.get(), &QAction::triggered, del_callback);
+
         QMenu ctx(view);
         ctx.addAction(edit_act.get());
+        ctx.addAction(del_act.get());
         ctx.exec(view->mapToGlobal(point));
 
-        if(edit)
+        if(selected != CtxMenuSelection::CTX_SEL_NONE)
         {
             // Look up the cell of the point, retrieve full exercise, and edit it
             auto cellIdx = view->indexAt(point);
             ExerciseSelectTableModel* view_model = qobject_cast<ExerciseSelectTableModel*>(view->model());
             ExerciseInformation exercise = view_model->getExercise(cellIdx.row());
-            editExercise(exercise);
-            _database->updateExerciseInformation(exercise);
+            switch(selected)
+            {
+            case CtxMenuSelection::CTX_SEL_EDIT:
+                editExercise(exercise);
+                _database->updateExerciseInformation(exercise);
+                break;
+            case CtxMenuSelection::CTX_SEL_DEL:
+                _database->deleteExerciseInformation(exercise);
+                break;
+            }
         }
     }
 }

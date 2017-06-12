@@ -34,6 +34,8 @@ const QString get_fav_exercises = "SELECT id, name, favorite FROM ExerciseInfo "
 const QString update_exercise = "UPDATE ExerciseInfo SET name = ?,favorite = ? WHERE id = ?";
 const QString update_set = "UPDATE SetInfo SET weight = ?, reps = ?";
 
+const QString delete_exercise = "DELETE FROM ExerciseInfo WHERE id = ?";
+
 // TODO: Rework query execution into separate templated function
 
 DBManager::DBManager(QObject *parent) : QObject(parent)
@@ -140,6 +142,25 @@ void DBManager::updateSetInformation(SetInformation &info)
 {
     qCritical("IMPLEMENT UPDATE EXERCISE INFO");
     return;
+}
+
+void DBManager::deleteExerciseInformation(ExerciseInformation &info)
+{
+    QSqlQuery query(_database);
+    if(!query.prepare(delete_exercise))
+    {
+        qCritical("Failed to prepare delete query for ExerciseInfo");
+        return;
+    }
+    query.addBindValue(info.id);
+    if(!query.exec())
+    {
+        qCritical("Delete of exercise information failed!");
+    }
+    else
+    {
+        emit exercisesUpdated();
+    }
 }
 
 QVector<ExerciseInformation> DBManager::getExercises(bool favorites_only)

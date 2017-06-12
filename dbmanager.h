@@ -21,6 +21,8 @@ public:
     void updateSetInformation(SetInformation& info);
     void updateExerciseInformation(ExerciseInformation& info);
 
+    void deleteExerciseInformation(ExerciseInformation& info);
+
     QVector<SetInformation> getAllSets();
     QVector<ExerciseInformation> getExercises(bool favorites_only = false);
     QVector<SetDisplayInformation> getAllDisplaySets();
