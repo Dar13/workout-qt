@@ -16,6 +16,7 @@ class MainWindow : public QMainWindow
 public slots:
     void handleLogControl(bool);
     void handleExerciseSelect(bool);
+    void handleSaveSet(bool);
 
 public:
     explicit MainWindow(QWidget *parent = 0);
