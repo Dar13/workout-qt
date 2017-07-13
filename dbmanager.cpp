@@ -25,6 +25,7 @@ const QString get_sets = "SELECT S.time, E.name, S.weight, S.reps "
                          "FROM ExerciseInfo as E, SetInfo as S "
                          "WHERE E.id = S.exercise_id";
 
+const QString get_exercise = "SELECT id, name, favorite FROM ExerciseInfo WHERE name = ?;";
 const QString get_all_exercises = "SELECT id, name, favorite FROM ExerciseInfo;";
 const QString get_fav_exercises = "SELECT id, name, favorite FROM ExerciseInfo "
                                   "WHERE favorite != 0;";
@@ -161,6 +162,36 @@ void DBManager::deleteExerciseInformation(ExerciseInformation &info)
     {
         emit exercisesUpdated();
     }
+}
+
+bool DBManager::getExercise(QString& exercise_name, ExerciseInformation& info)
+{
+    QSqlQuery query(_database);
+    if(!query.prepare(get_exercise))
+    {
+        qCritical("Failed to prepare lookup query for ExerciseInfo");
+        return false;
+    }
+    query.addBindValue(exercise_name);
+    if(!query.exec())
+    {
+        qCritical(tr("Retrieval of exercise information for exercise '%0' failed.").arg(exercise_name).toStdString().c_str());
+        return false;
+    }
+
+    // SQLite doesn't support query->size(), so we have to work around that.
+
+    if(!query.isSelect() || !query.first() || !query.isValid())
+    {
+        qCritical(tr("Unable to process results of the query to retrieve '%0'.").arg(exercise_name).toStdString().c_str());
+        return false;
+    }
+
+    info.id = query.value(0).toInt();
+    info.name = query.value(1).toString();
+    info.favorite = query.value(2).toBool();
+
+    return true;
 }
 
 QVector<ExerciseInformation> DBManager::getExercises(bool favorites_only)

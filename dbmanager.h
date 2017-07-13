@@ -24,7 +24,10 @@ public:
     void deleteExerciseInformation(ExerciseInformation& info);
 
     QVector<SetInformation> getAllSets();
+
+    bool getExercise(QString& exercise_name, ExerciseInformation& info);
     QVector<ExerciseInformation> getExercises(bool favorites_only = false);
+
     QVector<SetDisplayInformation> getAllDisplaySets();
 
     // TODO: Get a list, based on date range
