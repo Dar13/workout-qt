@@ -28,7 +28,8 @@ SOURCES += main.cpp\
     dbmanager.cpp \
     workoutlogdialog.cpp \
     exerciseselectdialog.cpp \
-    exerciseinfodialog.cpp
+    exerciseinfodialog.cpp \
+    setinfodialog.cpp
 
 HEADERS  += mainwindow.h \
     countdownmodel.h \
@@ -36,10 +37,13 @@ HEADERS  += mainwindow.h \
     dbtypes.h \
     workoutlogdialog.h \
     exerciseselectdialog.h \
-    exerciseinfodialog.h
+    exerciseinfodialog.h \
+    common.h \
+    setinfodialog.h
 
 FORMS    += \
     mainwindow.ui \
     workoutlogdialog.ui \
     exerciseselectdialog.ui \
-    exerciseinfodialog.ui
+    exerciseinfodialog.ui \
+    setinfodialog.ui

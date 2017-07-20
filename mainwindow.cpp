@@ -1,3 +1,5 @@
+#include <memory>
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "workoutlogdialog.h"
@@ -32,10 +34,10 @@ void MainWindow::handleLogControl(bool)
 
 void MainWindow::handleExerciseSelect(bool)
 {
-    ExerciseSelectDialog* ex_sel_dialog = new ExerciseSelectDialog(this, _database);
-    if(ex_sel_dialog->exec() == QDialog::Accepted)
+    auto exercise_sel_dlg = std::make_unique<ExerciseSelectDialog>(this, _database);
+    if(exercise_sel_dlg->exec() == QDialog::Accepted)
     {
-        ui->exercise_control->setText(ex_sel_dialog->getSelectedExercise().name);
+        ui->exercise_control->setText(exercise_sel_dlg->getSelectedExercise().name);
     }
 }
 
