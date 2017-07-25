@@ -49,6 +49,11 @@ int SetInfoDialog::getReps()
     return ui->set_reps->value();
 }
 
+QDateTime SetInfoDialog::getTimestamp()
+{
+    return ui->set_date->dateTime();
+}
+
 int SetInfoDialog::getWeight()
 {
     return ui->set_weight->value();

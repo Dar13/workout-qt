@@ -5,9 +5,6 @@
 #include <QVariant>
 #include <QDateTime>
 
-// TEMP
-#include <iostream>
-
 const QString database_path = "database.db";
 const QString create_exercise_query = "CREATE TABLE IF NOT EXISTS ExerciseInfo "
                                       "(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"

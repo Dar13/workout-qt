@@ -44,6 +44,7 @@ void WorkoutLogDialog::editSet(SetInformation &info)
             info.exercise_id = info_dlg->getExerciseID();
             info.weight = info_dlg->getWeight();
             info.reps = info_dlg->getReps();
+            info.timestamp = info_dlg->getTimestamp();
         }
     }
 }
@@ -172,7 +173,7 @@ QVariant WorkoutLogTableModel::headerData(int section, Qt::Orientation orientati
         switch(section)
         {
         case 0:
-            value = tr("Date/Time");
+            value = tr("Timestamp");
             break;
         case 1:
             value = tr("Exercise");

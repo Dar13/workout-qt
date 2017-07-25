@@ -26,7 +26,7 @@ struct SetInformation
     int exercise_id;
     int weight;
     int reps;
-    QDateTime timestamp; // Format in text is "yyyy-MM-dd HH:mm:ss"
+    QDateTime timestamp; // Use Qt::ISODate for format
 };
 
 #endif // DBTYPES_H

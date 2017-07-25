@@ -22,6 +22,7 @@ public:
     int getExerciseID();
     int getWeight();
     int getReps();
+    QDateTime getTimestamp();
 
 public slots:
     void handleExerciseSelect(bool);
