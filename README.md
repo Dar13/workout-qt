@@ -10,9 +10,9 @@ The plan is to start with a desktop app to flesh out features and then port to A
 * Straight-to-the-point main screen [done!]
 * Easy viewing of the set log [done!]
 * Ability to add/edit/delete exercises to/from app's database [done!]
-* Ability to record sets that are stored in a database [planned]
+* Ability to record sets that are stored in a database [done!]
 * Easy export of said database to CSV or raw dump of SQLite3 database file [planned]
-* Easy manipulation of log from within the app [planned]
+* Easy manipulation of log from within the app [editing done! deletion is planned]
 * Basic analysis/graphs of log, delineated by exercise, date, or other criteria [planned]
 
 # License/Copying

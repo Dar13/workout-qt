@@ -2,6 +2,7 @@
 
 #include <QMenu>
 
+#include "common.h"
 #include "exerciseselectdialog.h"
 #include "exerciseinfodialog.h"
 
@@ -50,7 +51,7 @@ ExerciseInformation ExerciseSelectDialog::getSelectedExercise()
 
 void ExerciseSelectDialog::handleAddExercise(bool)
 {
-    auto exercise_info = std::make_unique<ExerciseInfoDialog>(new ExerciseInfoDialog(this));
+    auto exercise_info = std::make_unique<ExerciseInfoDialog>(this);
     if(exercise_info->exec() == QDialog::Accepted)
     {
         ExerciseInformation info;
@@ -88,13 +89,6 @@ void ExerciseSelectDialog::handleRowSelection(const QModelIndex& curr, const QMo
         }
     }
 }
-
-enum class CtxMenuSelection
-{
-    CTX_SEL_NONE    = 0x0,
-    CTX_SEL_EDIT    = 0x1,
-    CTX_SEL_DEL     = 0x2,
-};
 
 void ExerciseSelectDialog::contextMenu(const QPoint& point)
 {

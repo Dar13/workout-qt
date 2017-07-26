@@ -1,6 +1,7 @@
 #include "dbmanager.h"
 
 #include <QSqlQuery>
+#include <QSqlError>
 #include <QVariant>
 #include <QDateTime>
 
@@ -21,11 +22,12 @@ const QString insert_exercise = "INSERT INTO ExerciseInfo (name, favorite) "
 const QString insert_set = "INSERT INTO SetInfo (exercise_id, weight, reps) "
                            "VALUES (?, ?, ?)";
 
-const QString get_sets = "SELECT S.time, E.name, S.weight, S.reps "
+const QString get_sets = "SELECT S.id, S.time, E.name, S.weight, S.reps "
                          "FROM ExerciseInfo as E, SetInfo as S "
                          "WHERE E.id = S.exercise_id";
 
 const QString get_exercise = "SELECT id, name, favorite FROM ExerciseInfo WHERE name = ?;";
+const QString get_exercise_from_id = "SELECT id, name, favorite FROM ExerciseInfo WHERE id = ?;";
 const QString get_all_exercises = "SELECT id, name, favorite FROM ExerciseInfo;";
 const QString get_fav_exercises = "SELECT id, name, favorite FROM ExerciseInfo "
                                   "WHERE favorite != 0;";
@@ -33,7 +35,7 @@ const QString get_fav_exercises = "SELECT id, name, favorite FROM ExerciseInfo "
 // TODO: retrieve sets in date range
 
 const QString update_exercise = "UPDATE ExerciseInfo SET name = ?,favorite = ? WHERE id = ?";
-const QString update_set = "UPDATE SetInfo SET weight = ?, reps = ?";
+const QString update_set = "UPDATE SetInfo SET exercise_id = ?, weight = ?, reps = ?, time = ? WHERE id = ?;";
 
 const QString delete_exercise = "DELETE FROM ExerciseInfo WHERE id = ?";
 
@@ -141,8 +143,25 @@ void DBManager::updateExerciseInformation(ExerciseInformation &info)
 
 void DBManager::updateSetInformation(SetInformation &info)
 {
-    qCritical("IMPLEMENT UPDATE EXERCISE INFO");
-    return;
+    QSqlQuery query(_database);
+    if(!query.prepare(update_set))
+    {
+        qCritical("Failed to prepare update query for SetInfo!");
+        return;
+    }
+    query.addBindValue(info.exercise_id);
+    query.addBindValue(info.weight);
+    query.addBindValue(info.reps);
+    query.addBindValue(info.timestamp.toString(Qt::ISODate));
+    query.addBindValue(info.id);
+    if(!query.exec())
+    {
+        qCritical("Update of set information failed!");
+    }
+    else
+    {
+        emit setsUpdated();
+    }
 }
 
 void DBManager::deleteExerciseInformation(ExerciseInformation &info)
@@ -164,7 +183,12 @@ void DBManager::deleteExerciseInformation(ExerciseInformation &info)
     }
 }
 
-bool DBManager::getExercise(QString& exercise_name, ExerciseInformation& info)
+void DBManager::deleteSetInformation(SetInformation &info)
+{
+    qDebug("IMPLEMENT DELETE SET");
+}
+
+bool DBManager::getExercise(const QString& exercise_name, ExerciseInformation& info)
 {
     QSqlQuery query(_database);
     if(!query.prepare(get_exercise))
@@ -184,6 +208,36 @@ bool DBManager::getExercise(QString& exercise_name, ExerciseInformation& info)
     if(!query.isSelect() || !query.first() || !query.isValid())
     {
         qCritical(tr("Unable to process results of the query to retrieve '%0'.").arg(exercise_name).toStdString().c_str());
+        return false;
+    }
+
+    info.id = query.value(0).toInt();
+    info.name = query.value(1).toString();
+    info.favorite = query.value(2).toBool();
+
+    return true;
+}
+
+bool DBManager::getExercise(int exercise_id, ExerciseInformation& info)
+{
+    QSqlQuery query(_database);
+    if(!query.prepare(get_exercise_from_id))
+    {
+        qCritical("Failed to prepare lookup query for ExerciseInfo");
+        return false;
+    }
+    query.addBindValue(exercise_id);
+    if(!query.exec())
+    {
+        qCritical(tr("Retrieval of exercise information for exercise ID '%0' failed.").arg(exercise_id).toStdString().c_str());
+        return false;
+    }
+
+    // SQLite doesn't support query->size(), so we have to work around that.
+
+    if(!query.isSelect() || !query.first() || !query.isValid())
+    {
+        qCritical(tr("Unable to process results of the query to retrieve '%0'.").arg(exercise_id).toStdString().c_str());
         return false;
     }
 
@@ -249,10 +303,11 @@ QVector<SetDisplayInformation> DBManager::getAllDisplaySets()
     while(query.isValid())
     {
         SetDisplayInformation info;
-        info.weight = query.value(2).toInt();
-        info.reps = query.value(3).toInt();
-        info.set_date = QDateTime::fromString(query.value(0).toString(), Qt::ISODate);
-        info.exercise_name = query.value(1).toString();
+        info.id = query.value(0).toInt();
+        info.weight = query.value(3).toInt();
+        info.reps = query.value(4).toInt();
+        info.timestamp = QDateTime::fromString(query.value(1).toString(), Qt::ISODate);
+        info.exercise_name = query.value(2).toString();
         values.push_back(info);
         query.next();
     }
