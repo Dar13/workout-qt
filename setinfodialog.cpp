@@ -20,19 +20,12 @@ SetInfoDialog::~SetInfoDialog()
     delete ui;
 }
 
-void SetInfoDialog::setElements(int exercise_id, int weight, int reps, QDateTime timestamp)
+void SetInfoDialog::setElements(const SetDisplayInformation &info)
 {
-    ui->set_weight->setValue(weight);
-    ui->set_reps->setValue(reps);
-    ui->set_date->setDateTime(timestamp);
-    ExerciseInformation exercise;
-    if(!_database->getExercise(exercise_id, exercise))
-    {
-        qCritical(tr("Unable to retrieve exercise of ID '%0'!").arg(exercise_id).toStdString().c_str());
-        return;
-    }
-
-    ui->set_exercise->setText(exercise.name);
+    ui->set_weight->setValue(info.weight);
+    ui->set_reps->setValue(info.reps);
+    ui->set_date->setDateTime(info.timestamp);
+    ui->set_exercise->setText(info.exercise_name);
 }
 
 void SetInfoDialog::handleExerciseSelect(bool)
@@ -44,30 +37,13 @@ void SetInfoDialog::handleExerciseSelect(bool)
     }
 }
 
-int SetInfoDialog::getReps()
+SetInformation SetInfoDialog::getSet()
 {
-    return ui->set_reps->value();
-}
+    SetDisplayInformation info;
+    info.reps = ui->set_reps->value();
+    info.weight = ui->set_weight->value();
+    info.timestamp = ui->set_date->dateTime();
+    info.exercise_name = ui->set_exercise->text().remove('&');
 
-QDateTime SetInfoDialog::getTimestamp()
-{
-    return ui->set_date->dateTime();
-}
-
-int SetInfoDialog::getWeight()
-{
-    return ui->set_weight->value();
-}
-
-int SetInfoDialog::getExerciseID()
-{
-    ExerciseInformation set_ex;
-    set_ex.name = ui->set_exercise->text();
-    set_ex.name = set_ex.name.remove('&');
-    if(!_database->getExercise(set_ex.name, set_ex))
-    {
-        return -1;
-    }
-
-    return set_ex.id;
+    return SetInformation::fromDisplayInfo(info, _database);
 }

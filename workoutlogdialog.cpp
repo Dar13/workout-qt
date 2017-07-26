@@ -38,13 +38,12 @@ void WorkoutLogDialog::editSet(SetInformation &info)
     auto info_dlg = std::make_unique<SetInfoDialog>(this, this->_database);
     if(info_dlg)
     {
-        info_dlg->setElements(info.exercise_id, info.weight, info.reps, info.timestamp);
+        SetDisplayInformation disp_info = SetDisplayInformation::fromSetInfo(info, _database);
+        info_dlg->setElements(disp_info);
         if(info_dlg->exec() == QDialog::Accepted)
         {
-            info.exercise_id = info_dlg->getExerciseID();
-            info.weight = info_dlg->getWeight();
-            info.reps = info_dlg->getReps();
-            info.timestamp = info_dlg->getTimestamp();
+            info = info_dlg->getSet();
+            info.id = disp_info.id;
         }
     }
 }
@@ -79,32 +78,29 @@ void WorkoutLogDialog::contextMenu(const QPoint& point)
         {
             auto cellIdx = view->indexAt(point);
             WorkoutLogTableModel* view_model = qobject_cast<WorkoutLogTableModel*>(view->model());
-            SetDisplayInformation set_display = view_model->getSet(cellIdx.row());
-            SetInformation set;
-            ExerciseInformation set_exercise;
-            set.id = set_display.id;
-            set.reps = set_display.reps;
-            set.weight = set_display.weight;
-            set.timestamp = set_display.timestamp;
-            if(_database->getExercise(set_display.exercise_name, set_exercise))
+            if(view_model)
             {
-                set.exercise_id = set_exercise.id;
-            }
-            else
-            {
-                // Hopefully we never have negative ID exercises...
-                set.exercise_id = -1;
-            }
+              SetDisplayInformation set_display = view_model->getSet(cellIdx.row());
+              SetInformation set = SetInformation::fromDisplayInfo(set_display, _database);
 
-            switch(selected)
-            {
-            case CtxMenuSelection::CTX_SEL_EDIT:
+              switch(selected)
+              {
+              case CtxMenuSelection::CTX_SEL_EDIT:
                 editSet(set);
                 _database->updateSetInformation(set);
                 break;
-            case CtxMenuSelection::CTX_SEL_DEL:
+              case CtxMenuSelection::CTX_SEL_DEL:
                 _database->deleteSetInformation(set);
                 break;
+              default:
+                // Do nothing
+                break;
+              }
+            }
+            else
+            {
+                // Something's gone pretty wrong...
+                // TODO: Assert?
             }
         }
     }
@@ -121,17 +117,18 @@ WorkoutLogTableModel::WorkoutLogTableModel(DBManager *database)
 
 Qt::ItemFlags WorkoutLogTableModel::flags(const QModelIndex &index) const
 {
-    // TODO: Make cells editable, to enable log modification?
     return (Qt::ItemIsSelectable | QAbstractTableModel::flags(index));
 }
 
 int WorkoutLogTableModel::columnCount(const QModelIndex &parent) const
 {
+    (void)parent;
     return 4;
 }
 
 int WorkoutLogTableModel::rowCount(const QModelIndex &parent) const
 {
+    (void)parent;
     return _sets.length();
 }
 

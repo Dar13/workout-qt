@@ -188,7 +188,7 @@ void DBManager::deleteSetInformation(SetInformation &info)
     qDebug("IMPLEMENT DELETE SET");
 }
 
-bool DBManager::getExercise(QString& exercise_name, ExerciseInformation& info)
+bool DBManager::getExercise(const QString& exercise_name, ExerciseInformation& info)
 {
     QSqlQuery query(_database);
     if(!query.prepare(get_exercise))

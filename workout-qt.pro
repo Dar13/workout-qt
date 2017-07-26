@@ -29,7 +29,8 @@ SOURCES += main.cpp\
     workoutlogdialog.cpp \
     exerciseselectdialog.cpp \
     exerciseinfodialog.cpp \
-    setinfodialog.cpp
+    setinfodialog.cpp \
+    dbtypes.cpp
 
 HEADERS  += mainwindow.h \
     countdownmodel.h \

@@ -17,7 +17,8 @@ public:
     explicit SetInfoDialog(QWidget *parent = 0, DBManager* dbManager = nullptr);
     ~SetInfoDialog();
 
-    void setElements(int exercise_id, int weight, int reps, QDateTime timestamp);
+    void setElements(const SetDisplayInformation& info);
+    SetInformation getSet();
 
     int getExerciseID();
     int getWeight();

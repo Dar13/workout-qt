@@ -26,7 +26,7 @@ public:
 
     QVector<SetInformation> getAllSets();
 
-    bool getExercise(QString& exercise_name, ExerciseInformation& info);
+    bool getExercise(const QString& exercise_name, ExerciseInformation& info);
     bool getExercise(int exercise_id, ExerciseInformation& info);
     QVector<ExerciseInformation> getExercises(bool favorites_only = false);
 
