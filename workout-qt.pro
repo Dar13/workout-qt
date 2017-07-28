@@ -49,3 +49,7 @@ FORMS   += ui/mainwindow.ui \
            ui/exerciseselectdialog.ui \
            ui/exerciseinfodialog.ui \
            ui/setinfodialog.ui
+
+DISTFILES += \
+    LICENSE \
+    README.md

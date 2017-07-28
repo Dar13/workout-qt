@@ -16,8 +16,7 @@ The plan is to start with a desktop app to flesh out features and then port to A
 * Basic analysis/graphs of log, delineated by exercise, date, or other criteria [planned]
 
 # License/Copying
-This is a pet project so I don't care all that much about this code, but I'm going to slap an MIT license on it.
-Will consider relicensing to GPL in the future.
+Refer to the LICENSE file
 
 # Installing
 No instructions yet, the app isn't even finished yet! Assumedly this will be updated when Android support is added,
