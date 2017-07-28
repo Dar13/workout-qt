@@ -22,29 +22,30 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-SOURCES += main.cpp\
-        mainwindow.cpp \
-    countdownmodel.cpp \
-    dbmanager.cpp \
-    workoutlogdialog.cpp \
-    exerciseselectdialog.cpp \
-    exerciseinfodialog.cpp \
-    setinfodialog.cpp \
-    dbtypes.cpp
+INCLUDEPATH += include/
 
-HEADERS  += mainwindow.h \
-    countdownmodel.h \
-    dbmanager.h \
-    dbtypes.h \
-    workoutlogdialog.h \
-    exerciseselectdialog.h \
-    exerciseinfodialog.h \
-    common.h \
-    setinfodialog.h
+SOURCES += source/main.cpp\
+           source/mainwindow.cpp \
+           source/countdownmodel.cpp \
+           source/dbmanager.cpp \
+           source/workoutlogdialog.cpp \
+           source/exerciseselectdialog.cpp \
+           source/exerciseinfodialog.cpp \
+           source/setinfodialog.cpp \
+           source/dbtypes.cpp
 
-FORMS    += \
-    mainwindow.ui \
-    workoutlogdialog.ui \
-    exerciseselectdialog.ui \
-    exerciseinfodialog.ui \
-    setinfodialog.ui
+HEADERS += include/mainwindow.h \
+           include/countdownmodel.h \
+           include/dbmanager.h \
+           include/dbtypes.h \
+           include/workoutlogdialog.h \
+           include/exerciseselectdialog.h \
+           include/exerciseinfodialog.h \
+           include/common.h \
+           include/setinfodialog.h
+
+FORMS   += ui/mainwindow.ui \
+           ui/workoutlogdialog.ui \
+           ui/exerciseselectdialog.ui \
+           ui/exerciseinfodialog.ui \
+           ui/setinfodialog.ui
