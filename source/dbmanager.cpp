@@ -38,6 +38,7 @@ const QString update_exercise = "UPDATE ExerciseInfo SET name = ?,favorite = ? W
 const QString update_set = "UPDATE SetInfo SET exercise_id = ?, weight = ?, reps = ?, time = ? WHERE id = ?;";
 
 const QString delete_exercise = "DELETE FROM ExerciseInfo WHERE id = ?";
+const QString delete_set = "DELETE FROM SetInfo WHERE id = ?;";
 
 // TODO: Rework query execution into separate templated function
 
@@ -185,7 +186,21 @@ void DBManager::deleteExerciseInformation(ExerciseInformation &info)
 
 void DBManager::deleteSetInformation(SetInformation &info)
 {
-    qDebug("IMPLEMENT DELETE SET");
+    QSqlQuery query(_database);
+    if(!query.prepare(delete_set))
+    {
+        qCritical("Failed to prepare query for DELETE command on SetInfo");
+        return;
+    }
+    query.addBindValue(info.id);
+    if(!query.exec())
+    {
+        qCritical("Delete of set information failed!");
+    }
+    else
+    {
+        emit setsUpdated();
+    }
 }
 
 bool DBManager::getExercise(const QString& exercise_name, ExerciseInformation& info)
