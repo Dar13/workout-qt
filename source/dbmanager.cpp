@@ -24,7 +24,8 @@ const QString insert_set = "INSERT INTO SetInfo (exercise_id, weight, reps) "
 
 const QString get_sets = "SELECT S.id, S.time, E.name, S.weight, S.reps "
                          "FROM ExerciseInfo as E, SetInfo as S "
-                         "WHERE E.id = S.exercise_id";
+                         "WHERE E.id = S.exercise_id "
+                         "ORDER BY S.time DESC;";
 
 const QString get_exercise = "SELECT id, name, favorite FROM ExerciseInfo WHERE name = ?;";
 const QString get_exercise_from_id = "SELECT id, name, favorite FROM ExerciseInfo WHERE id = ?;";
