@@ -31,6 +31,7 @@ public:
     QVector<ExerciseInformation> getExercises(bool favorites_only = false);
 
     QVector<SetDisplayInformation> getAllDisplaySets();
+    QVector<SetDisplayInformation> getAllDisplaySets(ExerciseInformation& info);
 
     // TODO: Get a list, based on date range
 

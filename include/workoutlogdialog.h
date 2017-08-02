@@ -15,7 +15,8 @@ class WorkoutLogTableModel : public QAbstractTableModel
     Q_OBJECT
 
 public:
-    WorkoutLogTableModel(DBManager* database = nullptr);
+    WorkoutLogTableModel(DBManager* database = nullptr,
+                         ExerciseInformation filter = ExerciseInformation());
 
     int rowCount(const QModelIndex &parent) const;
     int columnCount(const QModelIndex &parent) const;
@@ -29,6 +30,7 @@ public slots:
     void updateSets();
 
 private:
+    ExerciseInformation _filter_exercise;
     DBManager* _database;
     QVector<SetDisplayInformation> _sets;
 };
@@ -39,6 +41,7 @@ class WorkoutLogDialog : public QDialog
 
 public:
     explicit WorkoutLogDialog(QWidget *parent = 0, DBManager* dbManager = nullptr);
+    WorkoutLogDialog(QWidget *parent, DBManager *dbManager, ExerciseInformation filter);
     ~WorkoutLogDialog();
 
     void handleEditSet(bool);

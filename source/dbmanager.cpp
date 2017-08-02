@@ -27,6 +27,12 @@ const QString get_sets = "SELECT S.id, S.time, E.name, S.weight, S.reps "
                          "WHERE E.id = S.exercise_id "
                          "ORDER BY S.time DESC;";
 
+// Not used
+const QString get_sets_exercise = "SELECT S.id, S.time, E.name, S.weight, S.reps "
+                                  "FROM ExerciseInfo as E, SetInfo as S "
+                                  "WHERE (S.exercise_id = ? AND E.id = S.exercise_id) "
+                                  "ORDER BY S.time DESC;";
+
 const QString get_exercise = "SELECT id, name, favorite FROM ExerciseInfo WHERE name = ?;";
 const QString get_exercise_from_id = "SELECT id, name, favorite FROM ExerciseInfo WHERE id = ?;";
 const QString get_all_exercises = "SELECT id, name, favorite FROM ExerciseInfo;";
@@ -331,3 +337,21 @@ QVector<SetDisplayInformation> DBManager::getAllDisplaySets()
 
     return values;
 }
+
+QVector<SetDisplayInformation> DBManager::getAllDisplaySets(ExerciseInformation& info)
+{
+    // TODO: Perhaps use a dedicated SQL query...
+    auto all = this->getAllDisplaySets();
+    QVector<SetDisplayInformation> result;
+
+    for(auto itr : all)
+    {
+        if(itr.exercise_name == info.name)
+        {
+            result.append(itr);
+        }
+    }
+
+    return result;
+}
+

@@ -11,7 +11,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     connect(ui->log_control, &QPushButton::clicked, this, &MainWindow::handleLogControl);
-
+    connect(ui->exercise_log_control, &QPushButton::clicked, this, &MainWindow::handleExerciseLogControl);
     connect(ui->exercise_control, &QPushButton::clicked, this, &MainWindow::handleExerciseSelect);
     connect(ui->save_control, &QPushButton::clicked, this, &MainWindow::handleSaveSet);
 }
@@ -30,6 +30,22 @@ void MainWindow::handleLogControl(bool)
 {
     WorkoutLogDialog* log_dialog = new WorkoutLogDialog(this, _database);
     log_dialog->exec();
+}
+
+void MainWindow::handleExerciseLogControl(bool)
+{
+    ExerciseInformation filter;
+    std::unique_ptr<WorkoutLogDialog> ex_log_dialog;
+    if(_database->getExercise(ui->exercise_control->text().remove('&'), filter))
+    {
+      ex_log_dialog = std::make_unique<WorkoutLogDialog>(this, _database, std::move(filter));
+    }
+    else
+    {
+      ex_log_dialog = std::make_unique<WorkoutLogDialog>(this, _database);
+    }
+
+    ex_log_dialog->exec();
 }
 
 void MainWindow::handleExerciseSelect(bool)

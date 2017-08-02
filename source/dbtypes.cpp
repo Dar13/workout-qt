@@ -65,3 +65,13 @@ SetInformation SetInformation::fromDisplayInfo(const SetDisplayInformation& info
 {
     return SetInformation(info, db);
 }
+
+ExerciseInformation::ExerciseInformation()
+    : id(0), name(QString()), favorite(false)
+{
+}
+
+ExerciseInformation::ExerciseInformation(const ExerciseInformation &info)
+    : id(info.id), name(info.name), favorite(info.favorite)
+{
+}
