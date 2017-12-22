@@ -34,11 +34,13 @@ void MainWindow::handleLogControl(bool)
 
 void MainWindow::handleExerciseSelect(bool)
 {
-    auto exercise_sel_dlg = std::make_unique<ExerciseSelectDialog>(this, _database);
+    auto exercise_sel_dlg = new ExerciseSelectDialog(this, _database);
     if(exercise_sel_dlg->exec() == QDialog::Accepted)
     {
         ui->exercise_control->setText(exercise_sel_dlg->getSelectedExercise().name);
     }
+
+    delete exercise_sel_dlg;
 }
 
 void MainWindow::handleSaveSet(bool)

@@ -51,7 +51,7 @@ ExerciseInformation ExerciseSelectDialog::getSelectedExercise()
 
 void ExerciseSelectDialog::handleAddExercise(bool)
 {
-    auto exercise_info = std::make_unique<ExerciseInfoDialog>(this);
+    auto exercise_info = new ExerciseInfoDialog(this);
     if(exercise_info->exec() == QDialog::Accepted)
     {
         ExerciseInformation info;
@@ -59,6 +59,8 @@ void ExerciseSelectDialog::handleAddExercise(bool)
         info.name = exercise_info->getName();
         _database->addExerciseInformation(info);
     }
+
+    delete exercise_info;
 }
 
 void ExerciseSelectDialog::handleEditExercise(bool)
@@ -139,7 +141,7 @@ void ExerciseSelectDialog::contextMenu(const QPoint& point)
 
 void ExerciseSelectDialog::editExercise(ExerciseInformation &info)
 {
-    auto info_dlg = std::make_unique<ExerciseInfoDialog>(new ExerciseInfoDialog(this));
+    auto info_dlg = new ExerciseInfoDialog(new ExerciseInfoDialog(this));
     if(info_dlg)
     {
         info_dlg->setElements(info.name, info.favorite);
@@ -149,6 +151,8 @@ void ExerciseSelectDialog::editExercise(ExerciseInformation &info)
             info.favorite = info_dlg->isFavorite();
         }
     }
+
+    delete info_dlg;
 }
 
 ExerciseSelectTableModel::ExerciseSelectTableModel(DBManager *database, bool only_favorites)

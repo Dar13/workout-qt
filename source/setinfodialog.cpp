@@ -30,11 +30,13 @@ void SetInfoDialog::setElements(const SetDisplayInformation &info)
 
 void SetInfoDialog::handleExerciseSelect(bool)
 {
-    auto exercise_sel_dlg = std::make_unique<ExerciseSelectDialog>(this, _database);
+    auto exercise_sel_dlg = new ExerciseSelectDialog(this, _database);
     if(exercise_sel_dlg->exec() == QDialog::Accepted)
     {
         ui->set_exercise->setText(exercise_sel_dlg->getSelectedExercise().name);
     }
+
+    delete exercise_sel_dlg;
 }
 
 SetInformation SetInfoDialog::getSet()

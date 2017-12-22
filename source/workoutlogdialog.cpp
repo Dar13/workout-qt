@@ -35,7 +35,7 @@ WorkoutLogDialog::~WorkoutLogDialog()
 
 void WorkoutLogDialog::editSet(SetInformation &info)
 {
-    auto info_dlg = std::make_unique<SetInfoDialog>(this, this->_database);
+    auto info_dlg = new SetInfoDialog(this, this->_database);
     if(info_dlg)
     {
         SetDisplayInformation disp_info = SetDisplayInformation::fromSetInfo(info, _database);
@@ -46,6 +46,8 @@ void WorkoutLogDialog::editSet(SetInformation &info)
             info.id = disp_info.id;
         }
     }
+
+    delete info_dlg;
 }
 
 void WorkoutLogDialog::contextMenu(const QPoint& point)
