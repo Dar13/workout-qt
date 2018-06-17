@@ -6,6 +6,9 @@
 
 struct ExerciseInformation
 {
+    ExerciseInformation();
+    ExerciseInformation(const ExerciseInformation& info);
+
     int id;
     QString name;
     bool favorite;

@@ -24,7 +24,14 @@ const QString insert_set = "INSERT INTO SetInfo (exercise_id, weight, reps) "
 
 const QString get_sets = "SELECT S.id, S.time, E.name, S.weight, S.reps "
                          "FROM ExerciseInfo as E, SetInfo as S "
-                         "WHERE E.id = S.exercise_id";
+                         "WHERE E.id = S.exercise_id "
+                         "ORDER BY S.time DESC;";
+
+// Not used
+const QString get_sets_exercise = "SELECT S.id, S.time, E.name, S.weight, S.reps "
+                                  "FROM ExerciseInfo as E, SetInfo as S "
+                                  "WHERE (S.exercise_id = ? AND E.id = S.exercise_id) "
+                                  "ORDER BY S.time DESC;";
 
 const QString get_exercise = "SELECT id, name, favorite FROM ExerciseInfo WHERE name = ?;";
 const QString get_exercise_from_id = "SELECT id, name, favorite FROM ExerciseInfo WHERE id = ?;";
@@ -38,6 +45,7 @@ const QString update_exercise = "UPDATE ExerciseInfo SET name = ?,favorite = ? W
 const QString update_set = "UPDATE SetInfo SET exercise_id = ?, weight = ?, reps = ?, time = ? WHERE id = ?;";
 
 const QString delete_exercise = "DELETE FROM ExerciseInfo WHERE id = ?";
+const QString delete_set = "DELETE FROM SetInfo WHERE id = ?;";
 
 // TODO: Rework query execution into separate templated function
 
@@ -185,7 +193,21 @@ void DBManager::deleteExerciseInformation(ExerciseInformation &info)
 
 void DBManager::deleteSetInformation(SetInformation &info)
 {
-    qDebug("IMPLEMENT DELETE SET");
+    QSqlQuery query(_database);
+    if(!query.prepare(delete_set))
+    {
+        qCritical("Failed to prepare query for DELETE command on SetInfo");
+        return;
+    }
+    query.addBindValue(info.id);
+    if(!query.exec())
+    {
+        qCritical("Delete of set information failed!");
+    }
+    else
+    {
+        emit setsUpdated();
+    }
 }
 
 bool DBManager::getExercise(const QString& exercise_name, ExerciseInformation& info)
@@ -315,3 +337,21 @@ QVector<SetDisplayInformation> DBManager::getAllDisplaySets()
 
     return values;
 }
+
+QVector<SetDisplayInformation> DBManager::getAllDisplaySets(ExerciseInformation& info)
+{
+    // TODO: Perhaps use a dedicated SQL query...
+    auto all = this->getAllDisplaySets();
+    QVector<SetDisplayInformation> result;
+
+    for(auto itr : all)
+    {
+        if(itr.exercise_name == info.name)
+        {
+            result.append(itr);
+        }
+    }
+
+    return result;
+}
+

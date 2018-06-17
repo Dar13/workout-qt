@@ -8,11 +8,17 @@
 
 #include "ui_workoutlogdialog.h"
 
-WorkoutLogDialog::WorkoutLogDialog(QWidget *parent, DBManager* dbManager) :
-    QDialog(parent),
-    ui(new Ui::WorkoutLogDialog),
-    _database(dbManager),
-    _dataModel(dbManager)
+WorkoutLogDialog::WorkoutLogDialog(QWidget *parent, DBManager* dbManager)
+    : WorkoutLogDialog(parent, dbManager, ExerciseInformation())
+{
+}
+
+WorkoutLogDialog::WorkoutLogDialog(QWidget *parent, DBManager *dbManager,
+                                   ExerciseInformation filter)
+    : QDialog(parent),
+      ui(new Ui::WorkoutLogDialog),
+      _database(dbManager),
+      _dataModel(dbManager, filter)
 {
     ui->setupUi(this);
 
@@ -52,69 +58,76 @@ void WorkoutLogDialog::editSet(SetInformation &info)
 
 void WorkoutLogDialog::contextMenu(const QPoint& point)
 {
-    QObject* sender = this->sender();
-    QTableView* view = qobject_cast<QTableView*>(sender);
-    CtxMenuSelection selected = CtxMenuSelection::CTX_SEL_NONE;
+  QObject* sender = this->sender();
+  QTableView* view = qobject_cast<QTableView*>(sender);
+  CtxMenuSelection selected = CtxMenuSelection::CTX_SEL_NONE;
 
-    auto edit_callback = [&selected](bool) { selected = CtxMenuSelection::CTX_SEL_EDIT; };
-    auto del_callback = [&selected](bool) { selected = CtxMenuSelection::CTX_SEL_DEL; };
+  auto edit_callback = [&selected](bool) { selected = CtxMenuSelection::CTX_SEL_EDIT; };
+  auto del_callback = [&selected](bool) { selected = CtxMenuSelection::CTX_SEL_DEL; };
 
-    if(view != nullptr)
+  if(view != nullptr)
+  {
+    QAction* edit_ptr = new QAction(tr("&Edit"), view);
+    std::unique_ptr<QAction> edit_act(edit_ptr);
+    edit_act->setStatusTip(tr("Edit the selected set"));
+    connect(edit_act.get(), &QAction::triggered, edit_callback);
+
+    QAction* del_ptr = new QAction(tr("&Delete"), view);
+    std::unique_ptr<QAction> del_act(del_ptr);
+    del_act->setStatusTip(tr("Delete the selected set"));
+    connect(del_act.get(), &QAction::triggered, del_callback);
+
+    QMenu ctx(view);
+    ctx.addAction(edit_act.get());
+    ctx.addAction(del_act.get());
+    ctx.exec(view->mapToGlobal(point));
+
+    if(selected != CtxMenuSelection::CTX_SEL_NONE)
     {
-        QAction* edit_ptr = new QAction(tr("&Edit"), view);
-        std::unique_ptr<QAction> edit_act(edit_ptr);
-        edit_act->setStatusTip(tr("Edit the selected set"));
-        connect(edit_act.get(), &QAction::triggered, edit_callback);
+      auto cellIdx = view->indexAt(point);
+      WorkoutLogTableModel* view_model = qobject_cast<WorkoutLogTableModel*>(view->model());
+      if(view_model)
+      {
+        SetDisplayInformation set_display = view_model->getSet(cellIdx.row());
+        SetInformation set = SetInformation::fromDisplayInfo(set_display, _database);
 
-        QAction* del_ptr = new QAction(tr("&Delete"), view);
-        std::unique_ptr<QAction> del_act(del_ptr);
-        del_act->setStatusTip(tr("Delete the selected set"));
-        connect(del_act.get(), &QAction::triggered, del_callback);
-
-        QMenu ctx(view);
-        ctx.addAction(edit_act.get());
-        ctx.addAction(del_act.get());
-        ctx.exec(view->mapToGlobal(point));
-
-        if(selected != CtxMenuSelection::CTX_SEL_NONE)
+        switch(selected)
         {
-            auto cellIdx = view->indexAt(point);
-            WorkoutLogTableModel* view_model = qobject_cast<WorkoutLogTableModel*>(view->model());
-            if(view_model)
-            {
-              SetDisplayInformation set_display = view_model->getSet(cellIdx.row());
-              SetInformation set = SetInformation::fromDisplayInfo(set_display, _database);
-
-              switch(selected)
-              {
-              case CtxMenuSelection::CTX_SEL_EDIT:
-                editSet(set);
-                _database->updateSetInformation(set);
-                break;
-              case CtxMenuSelection::CTX_SEL_DEL:
-                _database->deleteSetInformation(set);
-                break;
-              default:
-                // Do nothing
-                break;
-              }
-            }
-            else
-            {
-                // Something's gone pretty wrong...
-                // TODO: Assert?
-            }
+        case CtxMenuSelection::CTX_SEL_EDIT:
+          editSet(set);
+          _database->updateSetInformation(set);
+          break;
+        case CtxMenuSelection::CTX_SEL_DEL:
+          _database->deleteSetInformation(set);
+          break;
+        default:
+          // Do nothing
+          break;
         }
+      }
+      else
+      {
+        // Something's gone pretty wrong...
+        // TODO: Assert?
+      }
     }
+  }
 }
 
-WorkoutLogTableModel::WorkoutLogTableModel(DBManager *database)
-    : _database(database)
+WorkoutLogTableModel::WorkoutLogTableModel(DBManager *database, ExerciseInformation filter)
+    : _database(database), _filter_exercise(filter)
 {
-    if(_database)
+  if(_database)
+  {
+    if(filter.id)
     {
-        _sets = _database->getAllDisplaySets();
+      _sets = _database->getAllDisplaySets(filter);
     }
+    else
+    {
+      _sets = _database->getAllDisplaySets();
+    }
+  }
 }
 
 Qt::ItemFlags WorkoutLogTableModel::flags(const QModelIndex &index) const
@@ -197,7 +210,14 @@ SetDisplayInformation WorkoutLogTableModel::getSet(int row)
 void WorkoutLogTableModel::updateSets()
 {
     int prev_col_count = this->columnCount(this->createIndex(0,0,nullptr));
-    _sets = _database->getAllDisplaySets();
+    if(_filter_exercise.id)
+    {
+      _sets = _database->getAllDisplaySets(_filter_exercise);
+    }
+    else
+    {
+      _sets = _database->getAllDisplaySets();
+    }
     emit dataChanged(this->createIndex(0,0,nullptr),
                      this->createIndex(1,prev_col_count, nullptr));
 }
